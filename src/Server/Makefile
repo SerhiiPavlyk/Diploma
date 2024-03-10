@@ -4,13 +4,13 @@ CFLAGS := -Wall -Wextra -std=c++11
 SRC := main.cpp
 OBJ := main.o
 
-all: program
+all: Server
 
-program: $(OBJ)
+Server: $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ)
 
 $(OBJ): $(SRC)
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -rf program $(OBJ)
+	rm -rf Server $(OBJ)
