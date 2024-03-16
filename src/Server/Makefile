@@ -1,16 +1,26 @@
+# Compiler
 CC := g++
-CFLAGS := -Wall -Wextra -std=c++11
 
-SRC := main.cpp
-OBJ := main.o
+# Files
+HEADERS := $(wildcard *.h)
+SRCS := $(wildcard *.cpp)
+OBJS := $(SRCS:.cpp=.o)
 
-all: Server
+# Flags
+CPPFLAGS := -I
+CXXFLAGS := -Wall -Wextra -std=c++11
+LDFLAGS := -lboost_system -lboost_thread
 
-Server: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $(OBJ)
+# Target
+TARGET := server
 
-$(OBJ): $(SRC)
-	$(CC) $(CFLAGS) -c $<
+# Target Rule
+$(TARGET): $(OBJS)
+    $(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
+# Phony target
+.PHONY: clean
+
+# Clean Rule
 clean:
-	rm -rf Server $(OBJ)
+    rm -f $(OBJS) $(TARGET)
