@@ -1,4 +1,4 @@
-FROM gcc:latest as build
+FROM ubuntu:latest
 
 # Update package list and install necessary dependencies
 RUN apt-get update && apt-get install -y \
@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /test_build
 
 RUN echo "Current working directory: $(pwd)"
-
 
 # Build your C++ server
 
