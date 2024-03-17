@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
     
 # Build your C++ server
-WORKDIR /Diploma/src
+WORKDIR /src
 RUN cmake -S . -B /build && \ 
     cmake --build /build
 
-WORKDIR /Diploma/src/build
+WORKDIR /src/build
 
 # Command to run your server
 ENTRYPOINT ["./Server"]
