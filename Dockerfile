@@ -17,7 +17,7 @@ WORKDIR ./src
 
 RUN ls -l
 
-RUN cmake -S . -B ./build && \ 
+RUN cmake -S ./Server -B ./build && \ 
     cmake --build ./build
 
 WORKDIR ./build
