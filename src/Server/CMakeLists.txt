@@ -1,39 +1,18 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.2)
 
 project(Server)
 
 # Compiler and flags
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-# Source files
-set(SRC
-    main.cpp
+set(Boost_USE_STATIC_LIBS ON)
+# find_package(Boost COMPONENTS program_options REQUIRED)
+include_directories(${BOOST_INCLUDE_DIRS})
+
+add_executable(Server
+main.cpp pch.cpp PostDataParser.cpp RequestHandler.cpp Server.cpp
+		 pch.h 	 PostDataParser.h   RequestHandler.h   Server.h
 )
 
-# Header files
 
-# Build the target executable
-add_executable(main ${SRC})
-
-# Optionally, you can specify the output directory for the executable
-# set_target_properties(main PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-# Clean up object files
-add_custom_target(clean_obj
-    COMMAND ${CMAKE_COMMAND} -P clean.cmake
-)
-
-## Specify the "all" target
-#add_custom_target(all DEPENDS main)
-
-# Clean target
-#add_custom_target(clean
-#    COMMAND ${CMAKE_BUILD_TOOL} clean_obj
-#    COMMAND ${CMAKE_COMMAND} -E remove -f main
-#)
-
-# Set the default build target to "all"
-#set_directory_properties(PROPERTIES
-#    ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_BINARY_DIR}/main;${CMAKE_BINARY_DIR}/CMakeCache.txt;${CMAKE_BINARY_DIR}/cmake_install.cmake"
-#)
+#target_link_libraries(Server ${Boost_LIBRARIES})
