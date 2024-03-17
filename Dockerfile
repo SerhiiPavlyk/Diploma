@@ -1,9 +1,5 @@
 FROM gcc:latest as build
 
-WORKDIR /test_build
-
-RUN echo "Current working directory: $(pwd)"
-
 # Update package list and install necessary dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -12,7 +8,12 @@ RUN apt-get update && apt-get install -y \
     g++ \
     libboost-dev libboost-program-options-dev && \
     rm -rf /var/lib/apt/lists/*
-    
+
+WORKDIR /test_build
+
+RUN echo "Current working directory: $(pwd)"
+
+
 # Build your C++ server
 
 RUN ls -a
