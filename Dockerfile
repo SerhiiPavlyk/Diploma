@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
     
 # Build your C++ server
+
+cd
+
 WORKDIR /src
 RUN cmake -S . -B /build && \ 
     cmake --build /build
