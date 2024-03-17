@@ -40,7 +40,5 @@ RUN echo "Current working directory: $(pwd)"
 
 RUN ls -l
 
-COPY --from=final /app/build/Server .
-
 # Command to run your server
-ENTRYPOINT ["./Server"]
+ENTRYPOINT ["/app/build/Server/Server"]
