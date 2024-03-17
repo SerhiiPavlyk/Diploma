@@ -22,14 +22,16 @@ bool RequestHandler::Handle() {
             std::cout << requestLine << std::endl;
         }
         if (requestLine.find("GET /index.html") != std::string::npos) {
-            response = "Content-Length: " + std::to_string(g_indexHTML.length()) + "\r\n" +
+            response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+                std::to_string(g_indexHTML.length()) + "\r\n" +
                 "Content-Type: text/plain\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
                 "\r\n" + g_indexHTML;
             needToWait = true;
         }
         else if (requestLine.find("GET /home.html") != std::string::npos) {
-            response = "Content-Length: " + std::to_string(g_homeHTML.length()) + "\r\n" +
+            response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+                std::to_string(g_homeHTML.length()) + "\r\n" +
                 "Content-Type: text/plain\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
                 "\r\n" + g_homeHTML;
@@ -76,7 +78,8 @@ bool RequestHandler::Handle() {
             }
             resOfCalcHTML.replace(posOfChange, whatToChange.size(), std::to_string(sum));
 
-            response = "Content-Length: " + std::to_string(resOfCalcHTML.length()) + "\r\n" +
+            response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+                std::to_string(resOfCalcHTML.length()) + "\r\n" +
                 "Content-Type: text/plain\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
                 "\r\n" + resOfCalcHTML;
@@ -98,7 +101,8 @@ bool RequestHandler::Handle() {
             std::string postData;
             std::getline(requestStream, postData);
 
-            response = "Content-Length: " + std::to_string(postData.length()) + "\r\n" +
+            response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+                std::to_string(postData.length()) + "\r\n" +
                 "Content-Type: text/plain\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
                 "\r\n" + postData;
