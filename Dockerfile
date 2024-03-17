@@ -20,7 +20,5 @@ WORKDIR /app/build
 RUN cmake ../src/Server && \ 
     cmake --build .
 
-WORKDIR /app
-
 # Command to run your server
 ENTRYPOINT ["./Server"]
