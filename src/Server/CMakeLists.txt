@@ -15,4 +15,4 @@ main.cpp pch.cpp PostDataParser.cpp RequestHandler.cpp Server.cpp
 )
 
 
-#target_link_libraries(Server ${Boost_LIBRARIES})
+target_link_libraries(Server ${Boost_LIBRARIES})
