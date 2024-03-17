@@ -1,5 +1,9 @@
 FROM gcc:latest as build
 
+WORKDIR /test_build
+
+RUN echo "Current working directory: $(pwd)"
+
 # Update package list and install necessary dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -11,16 +15,34 @@ RUN apt-get update && apt-get install -y \
     
 # Build your C++ server
 
+RUN ls -a
+
+RUN echo "Current working directory: $(pwd)"
+
+ADD ./src /app/src
+
+RUN echo "Current working directory: $(pwd)"
+
+RUN ls -a
+
+WORKDIR /app/build
+
+RUN echo "Current working directory: $(pwd)"
+
 RUN ls -l
 
-WORKDIR ./src/Server
+RUN cmake ../src/Server && \ 
+    cmake --build .
+
+WORKDIR /app
+
+RUN echo "Current working directory: $(pwd)"
 
 RUN ls -l
 
-RUN cmake -S . -B ./build && \ 
-    cmake --build ./build
+COPY --from=build /app/build/Server .
 
-WORKDIR ./build
+RUN echo "Current working directory: $(pwd)"
 
 RUN ls -l
 
