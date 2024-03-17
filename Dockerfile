@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     
 # Build your C++ server
 
-WORKDIR
+RUN echo "Current working directory: $(pwd)"
 
 WORKDIR /src
 RUN cmake -S . -B /build && \ 
