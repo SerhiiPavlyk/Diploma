@@ -13,14 +13,14 @@ RUN apt-get update && apt-get install -y \
 
 RUN ls -l
 
-WORKDIR /src
+WORKDIR ./src
 
 RUN ls -l
 
-RUN cmake -S . -B /build && \ 
-    cmake --build /build
+RUN cmake -S . -B ./build && \ 
+    cmake --build ./build
 
-WORKDIR /src/build
+WORKDIR ./build
 
 RUN ls -l
 
