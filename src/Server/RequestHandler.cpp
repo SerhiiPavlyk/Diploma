@@ -19,13 +19,20 @@ bool RequestHandler::Handle() {
         {
             std::istream requestStream(&request);
             std::getline(requestStream, requestLine);
+            std::cout << requestLine << std::endl;
         }
         if (requestLine.find("GET /index.html") != std::string::npos) {
-            response = "HTTP/1.1 200 OK\r\n\r\n" + g_indexHTML;
+            response = "Content-Length: " + std::to_string(g_indexHTML.length()) + "\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
+                "\r\n" + g_indexHTML;
             needToWait = true;
         }
         else if (requestLine.find("GET /home.html") != std::string::npos) {
-            response = "HTTP/1.1 200 OK\r\n\r\n" + g_homeHTML;
+            response = "Content-Length: " + std::to_string(g_homeHTML.length()) + "\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
+                "\r\n" + g_homeHTML;
             needToWait = true;
         }
         else if (requestLine.find("POST /Calculator") != std::string::npos) {
@@ -69,7 +76,10 @@ bool RequestHandler::Handle() {
             }
             resOfCalcHTML.replace(posOfChange, whatToChange.size(), std::to_string(sum));
 
-            response = "HTTP/1.1 200 OK\r\n\r\n" + resOfCalcHTML;
+            response = "Content-Length: " + std::to_string(resOfCalcHTML.length()) + "\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
+                "\r\n" + resOfCalcHTML;
         }
 
         else if (requestLine.find("POST /Login") != std::string::npos)
@@ -88,7 +98,10 @@ bool RequestHandler::Handle() {
             std::string postData;
             std::getline(requestStream, postData);
 
-            response = "HTTP/1.1 200 OK\r\n\r\n" + postData;
+            response = "Content-Length: " + std::to_string(postData.length()) + "\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
+                "\r\n" + postData;
         }
 
         else {
