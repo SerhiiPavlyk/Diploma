@@ -14,11 +14,6 @@ WORKDIR /Diploma/src
 RUN cmake -S . -B /build && \ 
     cmake --build /build
 
-FROM ubuntu:latest
-
-RUN groupadd -r sample && useradd -r -g sample sample
-USER sample
-
 WORKDIR /Diploma/src/build
 
 # Command to run your server
