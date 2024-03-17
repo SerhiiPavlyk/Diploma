@@ -13,11 +13,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN ls -l
 
-WORKDIR ./src
+WORKDIR ./src/Server
 
 RUN ls -l
 
-RUN cmake -S ./Server -B ./build && \ 
+RUN cmake -S . -B ./build && \ 
     cmake --build ./build
 
 WORKDIR ./build
