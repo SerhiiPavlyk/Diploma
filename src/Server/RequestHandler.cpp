@@ -55,7 +55,7 @@ bool RequestHandler::Handle() {
                 if (posOfChange == std::string::npos)
                 {
                     response = g_notFoundResponse;
-                    throw std::exception("Error HTML format\n");
+                    throw std::runtime_error("Error HTML format\n");
                 }
                 resOfCalcHTML.replace(posOfChange, pair.first.size(), std::to_string(pair.second));
             }
@@ -65,7 +65,7 @@ bool RequestHandler::Handle() {
             if (posOfChange == std::string::npos)
             {
                 response = g_notFoundResponse;
-                throw std::exception("Error HTML format\n");
+                throw std::runtime_error("Error HTML format\n");
             }
             resOfCalcHTML.replace(posOfChange, whatToChange.size(), std::to_string(sum));
 
