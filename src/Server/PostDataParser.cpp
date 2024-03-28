@@ -4,7 +4,7 @@
 #include "PostDataParser.h"
 #include "utils.h"
 
-void PostDataParser::CheckLogin(const std::string Data, std::string& login, std::string& password)
+void PostDataParser::CheckLogin(const std::string& data, std::string& login, std::string& password)
 {
     try
     {
@@ -13,7 +13,7 @@ void PostDataParser::CheckLogin(const std::string Data, std::string& login, std:
 
         std::smatch emailMatch, passwordMatch;
 
-        if (std::regex_search(Data, emailMatch, emailRegex) && std::regex_search(Data, passwordMatch, passwordRegex))
+        if (std::regex_search(data, emailMatch, emailRegex) && std::regex_search(data, passwordMatch, passwordRegex))
         {
             login = utils::toLower( emailMatch[1].str());
             password = utils::toLower(passwordMatch[1].str());
