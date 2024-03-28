@@ -122,6 +122,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
                 std::to_string(g_homeHTML.length()) + "\r\n" +
                 "Content-Type: text/html; charset=utf-8\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
+                "Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accep\r\n" +
                 "\r\n" + g_homeHTML + "\r\n\r\n";
         }
 
@@ -143,6 +144,5 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 
 void RequestHandler::afterWrite(const boost::system::error_code& ec, std::size_t bytes_transferred)
 {
-    // done writing, closing connection
     m_socket->close();
 }
