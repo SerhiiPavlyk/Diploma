@@ -122,7 +122,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
                 std::to_string(g_homeHTML.length()) + "\r\n" +
                 "Content-Type: text/html; charset=utf-8\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
-                "Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accep\r\n" +
+                "Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept\r\n" +
                 "\r\n" + g_homeHTML + "\r\n\r\n";
         }
 
