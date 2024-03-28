@@ -103,7 +103,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
         }
         
 
-        else if (requestLine.find("POST /Login") != std::string::npos)
+        else if (requestLine.find("/Login") != std::string::npos)
         {
             std::istream requestStream(&m_request);
             std::string headers;
