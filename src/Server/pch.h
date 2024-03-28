@@ -10,6 +10,7 @@
 #include <ctime>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/enable_shared_from_this.hpp>
 #include <thread>
 #include <boost/bind.hpp>

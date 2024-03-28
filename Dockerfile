@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     cmake \
     git \
     g++ \
+	libpq-dev \
+    libpqxx-dev \
     libboost-dev libboost-program-options-dev && \
     rm -rf /var/lib/apt/lists/*
     
