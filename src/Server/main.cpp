@@ -3,8 +3,6 @@
 #include "Server.h"
 #include <thread>
 
-#include "DataBase.h"
-
 int main(int argc, char *argv[])
 {
     try {
