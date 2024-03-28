@@ -12,10 +12,6 @@ bool DataBase::CheckUserData(const std::string& email, const std::string& passwo
 
     if (m_conn.is_open())
     {
-        std::cout << "Connected to database successfully!" << std::endl;
-
-        // Perform database operations here...
-
         pqxx::work txn(m_conn);
 
         // Execute SELECT query to retrieve all rows from a table

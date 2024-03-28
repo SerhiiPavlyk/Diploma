@@ -5,8 +5,8 @@
 #include <boost/throw_exception.hpp>
 
 Server::Server(unsigned short port) : m_ioService(),
-m_acceptor(m_ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
-m_stop(false) 
+    m_acceptor(m_ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
+    m_stop(false) 
 {
     std::cout << m_acceptor.local_endpoint().address().to_string() << std::endl;
 }

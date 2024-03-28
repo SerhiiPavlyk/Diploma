@@ -12,8 +12,13 @@ public:
     void Answer();
     void Handle(const boost::system::error_code& ec, std::size_t bytes_transferred);
     boost::shared_ptr<boost::asio::ip::tcp::socket> GetSocket() { return m_socket; }
-    void afterWrite(const boost::system::error_code& ec, std::size_t bytes_transferred);
+    
     ~RequestHandler();
+
+private:
+    void HadlerAfterWrite(const boost::system::error_code& ec, std::size_t bytes_transferred);
+    void SendResponse(const std::string& response);
+
 private:
     boost::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
     Server& m_server;
