@@ -1,8 +1,18 @@
 #pragma once
 
+#define _WIN32_WINNT 0x0601
+#define _CRT_SECURE_NO_WARNINGS
 #include <boost/asio.hpp>
+#include <boost/beast/http.hpp>
 #include <iostream>
-
+#include <ostream>
+#include <istream>
+#include <ctime>
+#include <string>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <thread>
+#include <boost/bind.hpp>
 
 const std::string g_indexHTML = R"(
 <!DOCTYPE html>
@@ -49,4 +59,4 @@ const std::string g_homeRes = R"(
 </html>
 )";
 
-const std::string g_notFoundResponse = "HTTP/1.1 404 Not Found\r\n\r\nPage not found";
+const std::string g_notFoundResponse = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept\r\n\r\nPage not found\r\n\r\n";

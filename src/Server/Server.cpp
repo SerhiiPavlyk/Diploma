@@ -6,25 +6,36 @@
 
 Server::Server(unsigned short port) : m_ioService(),
 m_acceptor(m_ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
-m_stop(true) 
+m_stop(false) 
 {
     std::cout << m_acceptor.local_endpoint().address().to_string() << std::endl;
 }
 
-void Server::Start() {
-    m_stop = false;
-    while (!m_stop) {
-        boost::asio::ip::tcp::socket socket(m_ioService);
-        m_acceptor.accept(socket);
-        RequestHandler handler(std::move(socket));
-        if (handler.Handle())
-            m_acceptor.wait(boost::asio::ip::tcp::acceptor::wait_read);
-
-    }
-
+void Server::Start() 
+{
+    m_thread.reset(new std::thread(&Server::ThreadFunction, this));
 }
 
 void Server::Stop()
 {
     m_stop = true;
+}
+
+void Server::ThreadFunction()
+{
+    StartAccept();
+    m_ioService.run();
+}
+
+void Server::StartAccept()
+{
+    boost::shared_ptr<RequestHandler> req(new RequestHandler(*this));
+    m_acceptor.async_accept(*(req->GetSocket()),
+        boost::bind(&Server::HandleAccept, this, req, _1));
+}
+
+void Server::HandleAccept(boost::shared_ptr<RequestHandler> req, const boost::system::error_code& error)
+{
+    if (!error) { req->Answer(); }
+    StartAccept();
 }

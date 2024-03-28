@@ -6,40 +6,57 @@
 
 #include <boost/bind.hpp>
 
-RequestHandler::RequestHandler(boost::asio::ip::tcp::socket socket) : m_socket(std::move(socket)) {}
+#include "Server.h"
 
+RequestHandler::RequestHandler(Server& server) 
+    : m_server(server)
+{
+    m_socket.reset(new boost::asio::ip::tcp::socket(server.GetIOService()));
+}
 
-bool RequestHandler::Handle() {
-    std::string requestLine;
+void RequestHandler::Answer()
+{
+        if (!m_socket) return;
+
+        // reads request till the end
+        boost::asio::async_read_until(*m_socket, m_request, "\r\n\r\n",
+            boost::bind(&RequestHandler::Handle, shared_from_this(), _1, _2));
+}
+
+void StrToStrBuf(const std::string& str, boost::asio::streambuf& buffer)
+{
+    std::ostream os(&buffer);
+    os << str;
+}
+
+void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t bytes_transferred)
+{
+    std::string requestLine(boost::asio::buffers_begin(m_request.data()),
+        boost::asio::buffers_end(m_request.data()));
     std::string response;
     bool needToWait = false;
+    std::cout << requestLine << std::endl;
     try {
-        boost::asio::streambuf request;
-        boost::asio::read_until(m_socket, request, "\r\n");
-        {
-            std::istream requestStream(&request);
-            std::getline(requestStream, requestLine);
-            std::cout << requestLine << std::endl;
-        }
         if (requestLine.find("GET /index.html") != std::string::npos) {
             response = "HTTP/1.1 200 OK\r\nContent - Length: " +
                 std::to_string(g_indexHTML.length()) + "\r\n" +
-                "Content-Type: text/plain\r\n" +
+                "Content-Type: text/html; charset=utf-8\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
-                "\r\n" + g_indexHTML;
+                "\r\n" + g_indexHTML + "\r\n\r\n";
             needToWait = true;
         }
         else if (requestLine.find("GET /home.html") != std::string::npos) {
             response = "HTTP/1.1 200 OK\r\nContent - Length: " +
                 std::to_string(g_homeHTML.length()) + "\r\n" +
-                "Content-Type: text/plain\r\n" +
+                "Content-Type: text/html; charset=utf-8\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
-                "\r\n" + g_homeHTML;
+                "\r\n" + g_homeHTML + "\r\n\r\n";
             needToWait = true;
         }
+        
+        
         else if (requestLine.find("POST /Calculator") != std::string::npos) {
-            boost::asio::read_until(m_socket, request, "\r\n\r\n");
-            std::istream requestStream(&request);
+            std::istream requestStream(&m_request);
             std::string headers;
             while (true) {
                 std::string header;
@@ -80,15 +97,15 @@ bool RequestHandler::Handle() {
 
             response = "HTTP/1.1 200 OK\r\nContent - Length: " +
                 std::to_string(resOfCalcHTML.length()) + "\r\n" +
-                "Content-Type: text/plain\r\n" +
+                "Content-Type: text/html; charset=utf-8\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
-                "\r\n" + resOfCalcHTML;
+                "\r\n" + resOfCalcHTML + "\r\n\r\n";
         }
+        
 
         else if (requestLine.find("POST /Login") != std::string::npos)
         {
-            boost::asio::read_until(m_socket, request, "\r\n\r\n");
-            std::istream requestStream(&request);
+            std::istream requestStream(&m_request);
             std::string headers;
             while (true)
             {
@@ -102,10 +119,10 @@ bool RequestHandler::Handle() {
             std::getline(requestStream, postData);
 
             response = "HTTP/1.1 200 OK\r\nContent - Length: " +
-                std::to_string(postData.length()) + "\r\n" +
-                "Content-Type: text/plain\r\n" +
+                std::to_string(g_homeHTML.length()) + "\r\n" +
+                "Content-Type: text/html; charset=utf-8\r\n" +
                 "Access-Control-Allow-Origin: *\r\n" + // Set the CORS header
-                "\r\n" + postData;
+                "\r\n" + g_homeHTML + "\r\n\r\n";
         }
 
         else {
@@ -115,11 +132,17 @@ bool RequestHandler::Handle() {
     }
     catch (const std::exception&)
     {
-        boost::asio::write(m_socket, boost::asio::buffer(response));
-        return needToWait;
+        StrToStrBuf(response, m_response);
+        boost::asio::async_write(*m_socket, m_response, boost::bind(&RequestHandler::afterWrite, shared_from_this(), _1, _2));
     }
-    boost::asio::write(m_socket, boost::asio::buffer(response));
-    return needToWait;
+    std::cout << "Responce:" << response << std::endl;
+    StrToStrBuf(response, m_response);
+    boost::asio::async_write(*m_socket, m_response, boost::bind(&RequestHandler::afterWrite, shared_from_this(), _1, _2));
 }
 
 
+void RequestHandler::afterWrite(const boost::system::error_code& ec, std::size_t bytes_transferred)
+{
+    // done writing, closing connection
+    m_socket->close();
+}
