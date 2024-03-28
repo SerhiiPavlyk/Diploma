@@ -22,8 +22,8 @@ set(PQXX_LIBRARIES pqxx_static)
 FetchContent_MakeAvailable(libpqxx)
 
 add_executable(Server
-main.cpp pch.cpp PostDataParser.cpp RequestHandler.cpp Server.cpp	DataBase.cpp
-		 pch.h 	 PostDataParser.h   RequestHandler.h   Server.h 	DataBase.h
+main.cpp pch.cpp PostDataParser.cpp RequestHandler.cpp Server.cpp	DataBase.cpp	utils.cpp
+		 pch.h 	 PostDataParser.h   RequestHandler.h   Server.h 	DataBase.h		utils.h
 		 
 )
 
