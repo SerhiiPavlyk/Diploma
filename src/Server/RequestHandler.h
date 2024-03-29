@@ -18,6 +18,7 @@ public:
 private:
     void HadlerAfterWrite(const boost::system::error_code& ec, std::size_t bytes_transferred);
     void SendResponse(const std::string& response);
+    void GetBody(std::string& body);
 
 private:
     boost::shared_ptr<boost::asio::ip::tcp::socket> m_socket;

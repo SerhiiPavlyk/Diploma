@@ -28,6 +28,5 @@ const std::string g_corp_header = "HTTP/1.1 200 OK\r\n"
 
 const std::string g_corp_access_all =	"Access-Control-Allow-Origin: *\r\n"
 										"Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"
-										"Access-Control-Allow-Headers: X-PINGOTHER, Content-Type\r\n"
-										"Connection: Keep-Alive\r\n";
+										"Access-Control-Allow-Headers: X-PINGOTHER, Content-Type\r\n";
 									

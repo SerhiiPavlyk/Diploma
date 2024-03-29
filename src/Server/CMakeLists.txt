@@ -17,6 +17,10 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/jtv/libpqxx.git
   GIT_TAG a6b1d60e74c1427c8ac2324b85cd4a0dc2068332
 )
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 set(PQXX_LIBRARIES pqxx_static)
 
 FetchContent_MakeAvailable(libpqxx)
@@ -30,3 +34,4 @@ main.cpp pch.cpp PostDataParser.cpp RequestHandler.cpp Server.cpp	DataBase.cpp	u
 
 target_link_libraries(Server ${Boost_LIBRARIES})
 target_link_libraries(Server ${PQXX_LIBRARIES})
+target_link_libraries(Server PRIVATE nlohmann_json::nlohmann_json)

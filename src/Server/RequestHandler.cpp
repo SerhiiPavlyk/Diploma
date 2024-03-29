@@ -10,6 +10,8 @@
 
 #include "DataBase.h"
 
+#include "nlohmann/json.hpp"
+
 RequestHandler::RequestHandler(Server& server)
 	: m_server(server)
 {
@@ -41,36 +43,98 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 			response = g_corp_header + "Content - Length: 0\r\n"+
 				"\r\n";
 		}
-		else if (requestLine.find("/Login") != std::string::npos)
+		else if (requestLine.find("POST /Login") != std::string::npos)
 		{
-			std::istream requestStream(&m_request);
-			std::string headers;
-			while (true)
-			{
-				std::string header;
-				std::getline(requestStream, header);
-				headers += header + "\n";
-				if (header == "\r")
-					break;
-			}
-			std::string postData;
-			std::getline(requestStream, postData);
+			std::string body;
+			GetBody(body);
 
-			std::string email, password;
+			std::string email, password, userName;
 
-			PostDataParser::CheckLogin(postData, email, password);
+			PostDataParser::CheckLogin(body, email, password);
 
-			std::string userName;
-			if (m_db->CheckUserData(email, password))
-				userName = "{\"Option\":\"Allow\"}";
+			std::string jsonResponse;
+			if (m_db->CheckUserData(email, password, userName))
+				jsonResponse = "{\"Option\":\"Allow\",\n\"UserName\": \""+ userName +"\"}";
 			else
-				userName = "{\"Option\":\"NotAllow\"}";
+				jsonResponse = "{\"Option\":\"NotAllow\"}";
 
 			response = "HTTP/1.1 200 OK\r\nContent - Length: " +
-				std::to_string(userName.length()) + "\r\n" +
+				std::to_string(jsonResponse.length()) + "\r\n" +
 				"Content-Type: application/json; charset=utf-8\r\n" +
 				g_corp_access_all + 
-				"\r\n" + userName + "\r\n\r\n";
+				"\r\n" + jsonResponse + "\r\n\r\n";
+		}
+		else if (requestLine.find("POST /CheckToken") != std::string::npos)
+		{
+			std::string body;
+			GetBody(body);
+			std::string userName;
+
+			PostDataParser::CheckUserName(body, userName);
+			nlohmann::json jsonResponse;
+			if (m_db->CheckUserData(userName))
+				jsonResponse["Option"] = "Allow";
+			else
+				jsonResponse["Option"] = "NotAllow";
+
+			response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+				std::to_string(jsonResponse.dump().length()) + "\r\n" +
+				"Content-Type: application/json; charset=utf-8\r\n" +
+				g_corp_access_all +
+				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
+		}
+
+		else if (requestLine.find("POST /SupportedBackupRules") != std::string::npos)
+		{
+			std::string body;
+			GetBody(body);
+			std::string userName;
+
+			PostDataParser::CheckUserName(body, userName);
+
+			nlohmann::json jsonResponse;
+			if (m_db->CheckUserData(userName))
+			{
+				jsonResponse["Option"] = "Allow";
+				std::string supportedFormats;
+				m_db->GetUserBackupRules(userName, supportedFormats);
+				jsonResponse.update( nlohmann::json::parse( supportedFormats));
+			}
+			else
+				jsonResponse["Option"] = "NotAllow";
+
+			response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+				std::to_string(jsonResponse.dump().length()) + "\r\n" +
+				"Content-Type: application/json; charset=utf-8\r\n" +
+				g_corp_access_all +
+				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
+		}
+
+		else if (requestLine.find("POST /SaveConfig") != std::string::npos)
+		{
+			std::string body;
+			GetBody(body);
+			std::string userName;
+			nlohmann::json jsonConfig;
+			PostDataParser::CheckUserName(body, userName);
+			PostDataParser::ParseConfig(body, jsonConfig);
+			nlohmann::json jsonResponse;
+			if (m_db->CheckUserData(userName))
+			{
+				jsonResponse["Option"] = "Allow";
+				if (m_db->SaveConfig(userName, jsonConfig))
+					jsonResponse["SaveResult"] = "Successfully";
+				else
+					jsonResponse["SaveResult"] = "UnSuccessfully";
+			}
+			else
+				jsonResponse["Option"] = "NotAllow";
+
+			response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+				std::to_string(jsonResponse.dump().length()) + "\r\n" +
+				"Content-Type: application/json; charset=utf-8\r\n" +
+				g_corp_access_all +
+				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
 		}
 
 		else
@@ -84,7 +148,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 	{
 		SendResponse(response);
 	}
-	std::cout << "Responce:" << response << std::endl;
+	std::cout << "Responce:\n" << response << std::endl;
 	SendResponse(response);
 }
 
@@ -98,6 +162,21 @@ void RequestHandler::SendResponse(const std::string& response)
 	std::ostream os(&m_response);
 	os << response;
 	boost::asio::async_write(*m_socket, m_response, boost::bind(&RequestHandler::HadlerAfterWrite, shared_from_this(), _1, _2));
+}
+
+void RequestHandler::GetBody(std::string& body)
+{
+	std::istream requestStream(&m_request);
+	std::string headers;
+	while (true)
+	{
+		std::string header;
+		std::getline(requestStream, header);
+		headers += header + "\n";
+		if (header == "\r")
+			break;
+	}
+	std::getline(requestStream, body);
 }
 
 RequestHandler::~RequestHandler() = default;
