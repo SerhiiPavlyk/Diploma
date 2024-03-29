@@ -34,4 +34,4 @@ main.cpp pch.cpp PostDataParser.cpp RequestHandler.cpp Server.cpp	DataBase.cpp	u
 
 target_link_libraries(Server ${Boost_LIBRARIES})
 target_link_libraries(Server ${PQXX_LIBRARIES})
-target_link_libraries(Server PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(Server nlohmann_json::nlohmann_json)
