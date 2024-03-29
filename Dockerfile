@@ -13,13 +13,22 @@ RUN apt-get update && apt-get install -y \
     libboost-dev libboost-program-options-dev && \
     rm -rf /var/lib/apt/lists/*
     
-# Build your C++ server
+# Install nlohmann/json
+RUN git clone https://github.com/nlohmann/json.git && \
+    mkdir -p json/build && \
+    cd json/build && \
+    cmake .. && \
+    make install && \
+    cd ../.. && \
+    rm -rf json
 
+# Copy your C++ server source code into the container
 ADD ./src /app/src
 
 WORKDIR /app/build
 
-RUN cmake ../src/Server && \ 
+# Build your C++ server
+RUN cmake ../src/Server && \
     cmake --build .
 
 # Command to run your server
