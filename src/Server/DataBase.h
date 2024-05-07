@@ -11,8 +11,10 @@ public:
 
     bool CheckUserData(const std::string& email, const std::string& password, std::string& userName);
     bool CheckUserData(const std::string& userName);
-    bool GetSupportedFormats(std::string& supportedFormats);
+    bool GetSupportedFormats(std::string& supportedFormats, const std::string& type_id);
     bool GetUserBackupRules(const std::string& userName, std::string& supportedFormats);
+    bool GetUserBlockRules(const std::string& userName, std::string& supportedFormats);
+
     bool SaveConfig(const std::string& userName, const nlohmann::json& config);
 
 private:

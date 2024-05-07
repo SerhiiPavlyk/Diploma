@@ -10,6 +10,11 @@ DataBase::DataBase()
 
 }
 
+std::string g_block_type_id = "block_type_id";
+std::string g_back_up_type_id = "back_up_type_id";
+std::string g_back_up_config = "back_up";
+std::string g_block_config = "block_file";
+
 bool DataBase::CheckUserData(const std::string& email, const std::string& password, std::string& userName)
 {
 	if (m_conn.is_open())
@@ -70,7 +75,7 @@ bool DataBase::CheckUserData(const std::string& userName)
 }
 
 
-bool DataBase::GetSupportedFormats(std::string& supportedFormats)
+bool DataBase::GetSupportedFormats(std::string& supportedFormats, const std::string& type_id)
 {
 	using json = nlohmann::json;
 	if (m_conn.is_open())
@@ -88,7 +93,7 @@ bool DataBase::GetSupportedFormats(std::string& supportedFormats)
 		{
 			json obj = {
 				{"extension", utils::toLower(row.at("extension").c_str())},
-				{"back_up_type_id", utils::toLower(row.at("id").c_str())}
+				{type_id, utils::toLower(row.at("id").c_str())}
 			};
 			supportedFormatsJSON.push_back(obj);
 		}
@@ -157,10 +162,52 @@ bool DataBase::GetUserBackupRules(const std::string& userName, std::string& supp
 				if (userConfig != "null")
 				{
 					supportedFormatsJSON = json::parse(userConfig);
-					supportedFormatsJSON = supportedFormatsJSON["back_up"];
+					supportedFormatsJSON = supportedFormatsJSON[g_back_up_config];
 				}
 				std::string SupportedFormats;
-				GetSupportedFormats(SupportedFormats);
+				GetSupportedFormats(SupportedFormats, g_back_up_type_id);
+				supportedBack_upJSON = json::parse(SupportedFormats);
+				mergeJsonArrays(supportedFormatsJSON, supportedBack_upJSON);
+				supportedFormats = supportedFormatsJSON.dump();
+				return true;
+			}
+		}
+	}
+	else
+	{
+		std::cerr << "Failed to connect to database" << std::endl;
+	}
+
+	return false;
+}
+
+bool DataBase::GetUserBlockRules(const std::string& userName, std::string& supportedFormats)
+{
+	using json = nlohmann::json;
+	if (m_conn.is_open())
+	{
+		pqxx::work txn(m_conn);
+
+		// Execute SELECT query to retrieve all rows from a table
+		pqxx::result result = txn.exec("SELECT user_name, config FROM public.\"Users\"");
+		// Commit the transaction
+		txn.commit();
+		json supportedFormatsJSON, supportedBack_upJSON;
+
+
+		// Iterate over the result set
+		for (const auto& row : result)
+		{
+			if (userName == utils::toLower(row.at("user_name").c_str()))
+			{
+				auto userConfig = utils::toLower(row.at("config").c_str());
+				if (userConfig != "null")
+				{
+					supportedFormatsJSON = json::parse(userConfig);
+					supportedFormatsJSON = supportedFormatsJSON[g_block_config];
+				}
+				std::string SupportedFormats;
+				GetSupportedFormats(SupportedFormats, g_block_type_id);
 				supportedBack_upJSON = json::parse(SupportedFormats);
 				mergeJsonArrays(supportedFormatsJSON, supportedBack_upJSON);
 				supportedFormats = supportedFormatsJSON.dump();
@@ -179,6 +226,9 @@ bool DataBase::GetUserBackupRules(const std::string& userName, std::string& supp
 bool DataBase::SaveConfig(const std::string& userName, const nlohmann::json& config)
 {
 	using json = nlohmann::json;
+	
+
+
 	try
 	{
 		if (m_conn.is_open())
@@ -192,7 +242,18 @@ bool DataBase::SaveConfig(const std::string& userName, const nlohmann::json& con
 			std::regex username_regex("<USERNAME>");
 			json userConfig;
 			GetUserConfig(userName, userConfig);
-			userConfig["back_up"] = config;
+			if (config.at(0).contains(g_block_type_id))
+			{
+				userConfig[g_block_config] = config;
+			}
+			else if (config.at(0).contains(g_back_up_type_id))
+			{
+				userConfig[g_back_up_config] = config;
+			}
+			else
+			{
+				std::cout << "Save error" << std::endl;
+			}
 			config_value = userConfig.dump();
 			// Perform replacements
 			script = std::regex_replace(script, config_regex, config_value);
