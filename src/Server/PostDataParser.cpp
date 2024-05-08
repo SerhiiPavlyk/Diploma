@@ -49,6 +49,10 @@ void PostDataParser::CheckUserName(const std::string& data, std::string& userNam
 
 void PostDataParser::ParseConfig(const std::string& data, nlohmann::json& config)
 {
+    nlohmann::json res;
     config = nlohmann::json::parse(data);
-    config = config["config"];
+    res["config"] = config["config"];
+    res["back_up_disks"] = config["back_up_disks"];
+    std::cout << res.dump() << std::endl;
+    config = std::move(res);
 }

@@ -119,6 +119,33 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
 		}
 
+		else if (requestLine.find("POST /UserConfig") != std::string::npos)
+		{
+			std::string body;
+			GetBody(body);
+
+			std::string email, password, userName;
+
+			PostDataParser::CheckLogin(body, email, password);
+
+			nlohmann::json jsonResponse;
+			if (m_db->CheckUserData(email, password, userName))
+			{
+				jsonResponse["Option"] = "Allow";
+				std::string supportedFormats;
+				m_db->GetUserBackupRules(userName, supportedFormats);
+				jsonResponse.update(nlohmann::json::parse(supportedFormats));
+			}
+			else
+				jsonResponse["Option"] = "NotAllow";
+
+			response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+				std::to_string(jsonResponse.dump().length()) + "\r\n" +
+				"Content-Type: application/json; charset=utf-8\r\n" +
+				g_corp_access_all +
+				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
+		}
+
 		else if (requestLine.find("POST /SupportedBlockRules") != std::string::npos)
 		{
 			std::string body;

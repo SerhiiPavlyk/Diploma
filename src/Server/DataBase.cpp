@@ -14,6 +14,7 @@ std::string g_block_type_id = "block_type_id";
 std::string g_back_up_type_id = "back_up_type_id";
 std::string g_back_up_config = "back_up";
 std::string g_block_config = "block_file";
+std::string g_back_up_disks = "back_up_disks";
 
 bool DataBase::CheckUserData(const std::string& email, const std::string& password, std::string& userName)
 {
@@ -152,6 +153,7 @@ bool DataBase::GetUserBackupRules(const std::string& userName, std::string& supp
 		txn.commit();
 		json supportedFormatsJSON, supportedBack_upJSON;
 
+		json out_json;
 
 		// Iterate over the result set
 		for (const auto& row : result)
@@ -168,7 +170,9 @@ bool DataBase::GetUserBackupRules(const std::string& userName, std::string& supp
 				GetSupportedFormats(SupportedFormats, g_back_up_type_id);
 				supportedBack_upJSON = json::parse(SupportedFormats);
 				mergeJsonArrays(supportedFormatsJSON, supportedBack_upJSON);
-				supportedFormats = supportedFormatsJSON.dump();
+				out_json = supportedFormatsJSON;
+				out_json[g_back_up_disks] = json::parse(userConfig)[g_back_up_disks];
+				supportedFormats = out_json.dump();
 				return true;
 			}
 		}
@@ -242,13 +246,14 @@ bool DataBase::SaveConfig(const std::string& userName, const nlohmann::json& con
 			std::regex username_regex("<USERNAME>");
 			json userConfig;
 			GetUserConfig(userName, userConfig);
-			if (config.at(0).contains(g_block_type_id))
+			if (config["config"].at(0).contains(g_block_type_id))
 			{
-				userConfig[g_block_config] = config;
+				userConfig[g_block_config] = config["config"];
 			}
-			else if (config.at(0).contains(g_back_up_type_id))
+			else if (config["config"].at(0).contains(g_back_up_type_id))
 			{
-				userConfig[g_back_up_config] = config;
+				userConfig[g_back_up_config] = config["config"];
+				userConfig["back_up_disks"] = config["back_up_disks"];
 			}
 			else
 			{
