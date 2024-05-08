@@ -119,7 +119,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
 		}
 
-		else if (requestLine.find("POST /UserConfig") != std::string::npos)
+		else if (requestLine.find("POST /ServiceUserConfig") != std::string::npos)
 		{
 			std::string body;
 			GetBody(body);
@@ -139,11 +139,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 			else
 				jsonResponse["Option"] = "NotAllow";
 
-			response = "HTTP/1.1 200 OK\r\nContent - Length: " +
-				std::to_string(jsonResponse.dump().length()) + "\r\n" +
-				"Content-Type: application/json; charset=utf-8\r\n" +
-				g_corp_access_all +
-				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
+			response = jsonResponse.dump();
 		}
 
 		else if (requestLine.find("POST /SupportedBlockRules") != std::string::npos)
