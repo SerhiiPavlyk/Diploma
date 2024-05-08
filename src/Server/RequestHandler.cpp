@@ -139,7 +139,11 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 			else
 				jsonResponse["Option"] = "NotAllow";
 
-			response = jsonResponse.dump();
+			response = "HTTP/1.1 200 OK\r\nContent - Length: " +
+				std::to_string(jsonResponse.dump().length()) + "\r\n" +
+				"Content-Type: application/json; charset=utf-8\r\n" +
+				g_corp_access_all +
+				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
 		}
 
 		else if (requestLine.find("POST /SupportedBlockRules") != std::string::npos)
