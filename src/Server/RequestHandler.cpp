@@ -116,7 +116,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 				std::to_string(jsonResponse.dump().length()) + "\r\n" +
 				"Content-Type: application/json; charset=utf-8\r\n" +
 				g_corp_access_all +
-				"\r\n" + jsonResponse.dump() + "\r\n\r\n";
+				"\r\n" + jsonResponse.dump();
 		}
 
 		else if (requestLine.find("POST /ServiceUserConfig") != std::string::npos)
