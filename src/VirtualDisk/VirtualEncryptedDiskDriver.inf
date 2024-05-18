@@ -1,0 +1,87 @@
+;
+; VirtualEncryptedDiskDriver.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=VirtualEncryptedDisk
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171}
+Provider=%ManufacturerName%
+CatalogFile=VirtualEncryptedDiskDriver.cat
+DriverVer= 1.0.0
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+VirtualEncryptedDiskDriver_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=VirtualEncryptedDiskClassReg
+
+[VirtualEncryptedDiskClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+VirtualEncryptedDiskDriver.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%VirtualEncryptedDiskDriver.DeviceDesc%=VirtualEncryptedDiskDriver_Device, Root\VirtualEncryptedDiskDriver
+
+[VirtualEncryptedDiskDriver_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+VirtualEncryptedDiskDriver.sys
+
+;-------------- Service installation
+[VirtualEncryptedDiskDriver_Device.NT.Services]
+AddService = VirtualEncryptedDiskDriver,%SPSVCINST_ASSOCSERVICE%, VirtualEncryptedDiskDriver_Service_Inst
+
+; -------------- VirtualEncryptedDiskDriver driver install sections
+[VirtualEncryptedDiskDriver_Service_Inst]
+DisplayName    = %VirtualEncryptedDiskDriver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\VirtualEncryptedDiskDriver.sys
+
+;
+;--- VirtualEncryptedDiskDriver_Device Coinstaller installation ------
+;
+
+[VirtualEncryptedDiskDriver_Device.NT.CoInstallers]
+AddReg=VirtualEncryptedDiskDriver_Device_CoInstaller_AddReg
+CopyFiles=VirtualEncryptedDiskDriver_Device_CoInstaller_CopyFiles
+
+[VirtualEncryptedDiskDriver_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[VirtualEncryptedDiskDriver_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[VirtualEncryptedDiskDriver_Device.NT.Wdf]
+KmdfService =  VirtualEncryptedDiskDriver, VirtualEncryptedDiskDriver_wdfsect
+[VirtualEncryptedDiskDriver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="VirtualEncryptedDisk" 
+DiskName = "VirtualEncryptedDiskDriver Installation Disk"
+VirtualEncryptedDiskDriver.DeviceDesc = "VirtualEncryptedDiskDriver Device"
+VirtualEncryptedDiskDriver.SVCDESC = "VirtualEncryptedDiskDriver Service"
