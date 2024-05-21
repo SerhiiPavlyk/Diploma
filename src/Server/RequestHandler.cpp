@@ -24,7 +24,7 @@ void RequestHandler::Answer()
 	if (!m_socket)
 		return;
 
-	const std::size_t buffer_size = 4 * 1024;
+	const std::size_t buffer_size = 8 * 1024;
 
 	m_request.prepare(buffer_size);
 
@@ -132,9 +132,12 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 			if (m_db->CheckUserData(email, password, userName))
 			{
 				jsonResponse["Option"] = "Allow";
-				std::string supportedFormats;
-				m_db->GetUserBackupRules(userName, supportedFormats);
-				jsonResponse.update(nlohmann::json::parse(supportedFormats));
+				std::string supportedFormatsBackup;
+				m_db->GetUserBackupRules(userName, supportedFormatsBackup);
+				jsonResponse.update(nlohmann::json::parse(supportedFormatsBackup));
+				std::string supportedFormatsBlock;
+				m_db->GetUserBlockRules(userName, supportedFormatsBlock);
+				jsonResponse["config_block"] = nlohmann::json::parse(supportedFormatsBlock)["config"];
 			}
 			else
 				jsonResponse["Option"] = "NotAllow";
