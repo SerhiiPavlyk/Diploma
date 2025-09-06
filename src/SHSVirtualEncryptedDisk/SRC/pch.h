@@ -31,7 +31,7 @@
 
 #define TOC_DATA_TRACK   0x04
 
-#define MAX_DISK 20
+#define MAX_DISK 25
 
 #include <ntifs.h> 
 #include <winsmcrd.h>

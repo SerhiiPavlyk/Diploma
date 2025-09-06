@@ -277,6 +277,49 @@ void SendBackUpExtensions(std::vector<std::string>& back_up_extensions)
 
 }
 
+void SendBlockExtensions(std::vector<std::string>& block_extensions)
+{
+	HANDLE  Device;
+	DWORD   BytesReturned;
+
+	const wchar_t    DriverName[] = DriverFSName_;
+
+	Device = CreateFile(DriverName,
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL);
+
+	if (Device == INVALID_HANDLE_VALUE)
+	{
+		throw std::exception("Error opening device: %d\n", GetLastError());
+	}
+
+	std::unique_ptr<FSFILTER_EXTENSIONS>response = std::make_unique <FSFILTER_EXTENSIONS>();
+	size_t i = 0;
+	for (; i < block_extensions.size(); i++)
+	{
+		response->_extensions[i] = stringToUnicode(block_extensions[i]);
+	}
+	for (; i < ARRAY_SIZE; i++)
+	{
+		response->_extensions[i] = stringToUnicode(".default");
+	}
+	if (!DeviceIoControl(Device, IOCTL_FILE_SET_BLOCK_EXTENSIONS,
+		(PVOID)response.get(), sizeof(FSFILTER_EXTENSIONS),
+		NULL,
+		0, &BytesReturned, NULL))
+	{
+		CloseHandle(Device);
+		throw std::exception("Error sending IOCTL: %d\n", GetLastError());
+	}
+
+	CloseHandle(Device);
+
+}
+
 // Structure to hold the dynamic array
 typedef struct _DYNAMIC_UNICODE_STRING_ARRAY {
 	UNICODE_STRING** strings;
@@ -332,5 +375,50 @@ void GetBackupFilesList(std::vector<std::wstring>& backup_files)
 	} while (BytesReturned != 0);
 
 		CloseHandle(Device);
+}
 
+void GetBlockFilesList(std::vector<std::wstring>& blocked_files)
+{
+	HANDLE  Device;
+	DWORD   BytesReturned;
+
+	const wchar_t    DriverName[] = DriverFSName_;
+
+	Device = CreateFile(DriverName,
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL);
+
+	if (Device == INVALID_HANDLE_VALUE)
+	{
+		throw std::runtime_error("GetBackupFilesList. Error opening device");
 	}
+
+	do
+	{
+		WCHAR response_buffer[MAX_PATH];
+		ZeroMemory(response_buffer, sizeof(response_buffer));
+
+		if (!DeviceIoControl(Device, IOCTL_FILE_GET_BLOCKED_FILES,
+			NULL, 0,
+			&response_buffer,
+			sizeof(response_buffer), &BytesReturned, NULL))
+		{
+			CloseHandle(Device);
+			throw std::runtime_error("GetBackupFilesList. Error sending IOCTL");
+		}
+		if (BytesReturned == 0)
+		{
+			continue;
+		}
+
+		std::wstring str(response_buffer);
+		blocked_files.push_back(str);
+	} while (BytesReturned != 0);
+
+	CloseHandle(Device);
+
+}

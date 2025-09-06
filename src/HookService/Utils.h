@@ -24,12 +24,17 @@ struct back_up
 	std::vector< std::unique_ptr<back_up_disk_data>> m_disks;
 };
 
+struct block
+{
+	std::vector< std::unique_ptr<file_for_scan_data>> m_block_extensions;
+};
+
 struct config
 {
 	std::string m_email;
 	std::string m_password;
 	std::unique_ptr<back_up> m_back_up_config;
-
+	std::unique_ptr<block> m_block_config;
 };
 
 std::string wstring2string(const std::wstring& from);

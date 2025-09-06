@@ -1,0 +1,87 @@
+;
+; SHSVirtualEncryptedDiskDriver.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=SHSVirtualEncryptedDisk
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171}
+Provider=%ManufacturerName%
+CatalogFile=SHSVirtualEncryptedDiskDriver.cat
+DriverVer= 1.0.0
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+SHSVirtualEncryptedDiskDriver_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SHSVirtualEncryptedDiskClassReg
+
+[SHSVirtualEncryptedDiskClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+SHSVirtualEncryptedDiskDriver.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%SHSVirtualEncryptedDiskDriver.DeviceDesc%=SHSVirtualEncryptedDiskDriver_Device, Root\SHSVirtualEncryptedDiskDriver
+
+[SHSVirtualEncryptedDiskDriver_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+SHSVirtualEncryptedDiskDriver.sys
+
+;-------------- Service installation
+[SHSVirtualEncryptedDiskDriver_Device.NT.Services]
+AddService = SHSVirtualEncryptedDiskDriver,%SPSVCINST_ASSOCSERVICE%, SHSVirtualEncryptedDiskDriver_Service_Inst
+
+; -------------- SHSVirtualEncryptedDiskDriver driver install sections
+[SHSVirtualEncryptedDiskDriver_Service_Inst]
+DisplayName    = %SHSVirtualEncryptedDiskDriver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\SHSVirtualEncryptedDiskDriver.sys
+
+;
+;--- SHSVirtualEncryptedDiskDriver_Device Coinstaller installation ------
+;
+
+[SHSVirtualEncryptedDiskDriver_Device.NT.CoInstallers]
+AddReg=SHSVirtualEncryptedDiskDriver_Device_CoInstaller_AddReg
+CopyFiles=SHSVirtualEncryptedDiskDriver_Device_CoInstaller_CopyFiles
+
+[SHSVirtualEncryptedDiskDriver_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[SHSVirtualEncryptedDiskDriver_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[SHSVirtualEncryptedDiskDriver_Device.NT.Wdf]
+KmdfService =  SHSVirtualEncryptedDiskDriver, SHSVirtualEncryptedDiskDriver_wdfsect
+[SHSVirtualEncryptedDiskDriver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="SHSVirtualEncryptedDisk" 
+DiskName = "SHSVirtualEncryptedDiskDriver Installation Disk"
+SHSVirtualEncryptedDiskDriver.DeviceDesc = "SHSVirtualEncryptedDiskDriver Device"
+SHSVirtualEncryptedDiskDriver.SVCDESC = "SHSVirtualEncryptedDiskDriver Service"

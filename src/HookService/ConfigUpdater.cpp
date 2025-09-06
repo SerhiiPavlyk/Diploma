@@ -36,58 +36,47 @@ ConfigUpdater::ConfigUpdater(Logger* logger)
 
 void formatDisk(const wchar_t letter)
 {
-	wchar_t volume[] = L" :\\";
-	volume[0] = letter;
-	wchar_t volumeName[MAX_PATH + 1] = { 0 };
-	DWORD serialNumber = 0;
-	DWORD maxComponentLength = 0;
-	DWORD fileSystemFlags = 0;
-	wchar_t fileSystemName[MAX_PATH + 1] = { 0 };
 
-	if (!GetVolumeInformation(volume, volumeName, ARRAYSIZE(volumeName), &serialNumber, &maxComponentLength, &fileSystemFlags, fileSystemName, ARRAYSIZE(fileSystemName)))
+	// Command to execute
+	std::wstring command = L"cmd.exe /C format ";
+	command += letter;
+	command += L": /FS:FAT /X /Q /y";
+
+	// Convert command to LPCTSTR
+	LPCWSTR lpCommand = command.c_str();
+
+	// CreateProcess variables
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	// Initialize STARTUPINFO
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
+
+	// Create the process
+	if (!CreateProcess(NULL,   // No module name (use command line)
+		(LPWSTR)lpCommand,     // Command line
+		NULL,                  // Process handle not inheritable
+		NULL,                  // Thread handle not inheritable
+		FALSE,                 // Set handle inheritance to FALSE
+		0,                     // No creation flags
+		NULL,                  // Use parent's environment block
+		NULL,                  // Use parent's starting directory
+		&si,                   // Pointer to STARTUPINFO structure
+		&pi)                   // Pointer to PROCESS_INFORMATION structure
+		)
 	{
-
-		// Command to execute
-		std::wstring command = L"cmd.exe /C format ";
-		command += letter;
-		command += L": /FS:NTFS /X /Q /y";
-
-		// Convert command to LPCTSTR
-		LPCWSTR lpCommand = command.c_str();
-
-		// CreateProcess variables
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
-
-		// Initialize STARTUPINFO
-		ZeroMemory(&si, sizeof(si));
-		si.cb = sizeof(si);
-		ZeroMemory(&pi, sizeof(pi));
-
-		// Create the process
-		if (!CreateProcess(NULL,   // No module name (use command line)
-			(LPWSTR)lpCommand,     // Command line
-			NULL,                  // Process handle not inheritable
-			NULL,                  // Thread handle not inheritable
-			FALSE,                 // Set handle inheritance to FALSE
-			0,                     // No creation flags
-			NULL,                  // Use parent's environment block
-			NULL,                  // Use parent's starting directory
-			&si,                   // Pointer to STARTUPINFO structure
-			&pi)                   // Pointer to PROCESS_INFORMATION structure
-			)
-		{
-			throw std::runtime_error("CreateProcess format disk " + letter);
-		}
-
-		// Wait until child process exits.
-		WaitForSingleObject(pi.hProcess, INFINITE);
-
-		// Close process and thread handles.
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
-
+		throw std::runtime_error("CreateProcess format disk " + letter);
 	}
+
+	// Wait until child process exits.
+	WaitForSingleObject(pi.hProcess, INFINITE);
+
+	// Close process and thread handles.
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
 }
 
 
@@ -152,7 +141,7 @@ void ConfigUpdater::CreateBackupDisk(const wchar_t letter)
 		catch (const ReadRegistryError&)
 		{
 			formatDisk(letter);
-			
+
 			SetDataToRegister(letter_str, REGISTRY_FORMATED_DISKS_KEY);
 			return;
 		}
@@ -163,7 +152,7 @@ void ConfigUpdater::CreateBackupDisk(const wchar_t letter)
 			EditRegistryValue(REGISTRY_FORMATED_DISKS_KEY, formated_disks);
 		}
 	}
-	
+
 	catch (const MountError&)
 	{
 		std::wstring letter_str;
@@ -189,7 +178,7 @@ void ConfigUpdater::UnmockAllBackupDisks()
 		UnmockBackupDisk(m_config->m_back_up_config->m_disks[i]->m_letter);
 
 	}
-	
+
 }
 
 void ConfigUpdater::UnmockBackupDisk(const wchar_t letter)
@@ -202,15 +191,22 @@ void ConfigUpdater::UnmockBackupDisk(const wchar_t letter)
 
 void ConfigUpdater::SendExtensionsToDriver()
 {
-	std::vector<std::string> vec;
+	std::vector<std::string> vec_backup;
 	for (size_t i = 0; i < m_config->m_back_up_config->m_block_extensions.size(); i++)
 	{
-		vec.push_back(m_config->m_back_up_config->m_block_extensions[i]->m_block_extension);
+		vec_backup.push_back(m_config->m_back_up_config->m_block_extensions[i]->m_block_extension);
 	}
-	SendBackUpExtensions(vec);
+	SendBackUpExtensions(vec_backup);
+
+	std::vector<std::string> vec_block;
+	for (size_t i = 0; i < m_config->m_block_config->m_block_extensions.size(); i++)
+	{
+		vec_block.push_back(m_config->m_block_config->m_block_extensions[i]->m_block_extension);
+	}
+	SendBlockExtensions(vec_block);
 }
 
-std::wstring extractFileName(const std::wstring& fullPath)
+std::wstring extractFileName(const std::wstring & fullPath)
 {
 	// Find the position of the last directory separator
 	size_t lastSeparatorPos = fullPath.find_last_of(L"\\");
@@ -244,6 +240,32 @@ void ConfigUpdater::BackupAllFiles()
 			out_path += extractFileName(backup_files_path[i]);
 			std::ofstream outputfile(out_path, std::ios::binary | std::ios::out);
 			boost::iostreams::copy(inputfile, outputfile);
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		m_logger->Error(ex.what());
+	}
+}
+
+void ConfigUpdater::BlockAllFiles()
+{
+	try
+	{
+		std::vector<std::wstring> block_files_path;
+
+		GetBlockFilesList(block_files_path);
+
+		for (size_t i = 0; i < block_files_path.size(); i++)
+		{
+			std::string path = "C:" + wstring2string(block_files_path[i]);
+
+			if (std::remove(path.c_str()) != 0)
+			{
+				std::string message = "Can't delete file ";
+				message += path;
+				m_logger->Debug(message);
+			}
 		}
 	}
 	catch (const std::exception& ex)
@@ -338,7 +360,7 @@ void ConfigUpdater::Request2ServerUpdateData()
 
 	// HTTP response
 	boost::beast::flat_buffer buffer;
-	buffer.prepare(4 * 1024);
+	buffer.prepare(8 * 1024);
 	http::response<http::dynamic_body> res;
 	http::read(m_socket, buffer, res);
 
@@ -357,7 +379,7 @@ void ConfigUpdater::Request2ServerUpdateData()
 	m_config->m_email = std::move(userEmail);
 	m_config->m_password = std::move(userPassword);
 	std::unique_ptr<back_up> back_up_data = std::make_unique<back_up>();
-
+	std::unique_ptr<block> block_data = std::make_unique<block>();
 	int i = 0;
 	for (const auto element : config_json["back_up_disks"])
 	{
@@ -386,7 +408,18 @@ void ConfigUpdater::Request2ServerUpdateData()
 
 		back_up_data->m_block_extensions.emplace_back(std::move(data));
 	}
+	i = 0;
+	for (const auto element : config_json["config_block"])
+	{
+		if (!element["action"].get<bool>())
+			continue;
+		std::unique_ptr <file_for_scan_data> data(new file_for_scan_data());
+		data->m_id = i;
+		data->m_block_extension = removeQuotes(element["extension"].dump());
+		block_data->m_block_extensions.emplace_back(std::move(data));
+	}
 
 	m_config->m_back_up_config = std::move(back_up_data);
+	m_config->m_block_config = std::move(block_data);
 
 }

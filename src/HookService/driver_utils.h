@@ -56,4 +56,6 @@ typedef struct _EXTENSIONS
 
 
 void SendBackUpExtensions(std::vector<std::string>& back_up_extensions);
+void SendBlockExtensions(std::vector<std::string>& block_extensions);
 void GetBackupFilesList(std::vector<std::wstring>& back_up_extensions);
+void GetBlockFilesList(std::vector<std::wstring>& blocked_files);

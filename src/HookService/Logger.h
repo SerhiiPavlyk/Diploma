@@ -3,6 +3,8 @@
 //#define DEBUG
 
 #include <fstream>
+#include <mutex>
+
 class Logger 
 {
 public:

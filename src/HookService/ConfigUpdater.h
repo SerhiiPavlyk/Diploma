@@ -12,6 +12,7 @@ public:
 	void UnmockBackupDisk(const wchar_t letter);
 	void SendExtensionsToDriver();
 	void BackupAllFiles();
+	void BlockAllFiles();
 	void CreateAllBackupDisks();
 	void UnmockAllBackupDisks();
 private:

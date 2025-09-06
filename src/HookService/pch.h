@@ -17,6 +17,7 @@
 #include <locale>
 #include <codecvt>
 #include <map>
+#include <cstdio> // For std::remove
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>

@@ -11,7 +11,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv);
 VOID WINAPI ServiceCtrlHandler(DWORD);
 DWORD WINAPI ServiceWorkerThread(LPVOID lpParam);
 
-#define SERVICE_NAME  _T("HideAndSickWindowsService")
+#define SERVICE_NAME  _T("SHSService")
 
 static std::unique_ptr<ConfigUpdater> g_updater = nullptr;
 static std::unique_ptr <Logger> g_logger = nullptr;
@@ -55,11 +55,11 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 DWORD WINAPI ServiceUpdateThread(LPVOID lpParam)
 {
     //int backup_time = 900000;
-    int backup_time = 60000;
+    int backup_time = 5 * 60000; //60000 = 1 min
     while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0)
     {
         g_updater->BackupAllFiles();
-
+        g_updater->BlockAllFiles();
         Sleep(backup_time);// Wait 
     }
     return ERROR_SUCCESS;
