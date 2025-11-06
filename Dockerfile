@@ -1,30 +1,25 @@
-FROM gcc:latest as build
+FROM cmake:latest as build
 
 WORKDIR /test_build
 
 # Update package list and install necessary dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    cmake \
     git \
-    g++ \
-	libpq-dev \
+    libpq-dev \
     libpqxx-dev \
     libboost-dev libboost-program-options-dev && \
     rm -rf /var/lib/apt/lists/*
     
 # Install nlohmann/json
 RUN git clone https://github.com/nlohmann/json.git && \
-    mkdir -p json/build && \
-    cd json/build && \
-    cmake .. && \
-    make install && \
-    cd ../.. && \
+    cmake -S json -B json/build && \
+    cmake --build json/build && \
+    cmake --install json/build && \
     rm -rf json
 
 # Copy your C++ server source code into the container
 ADD ./src /app/src
-
 WORKDIR /app/build
 
 # Build your C++ server
