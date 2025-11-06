@@ -71,7 +71,7 @@ bool DataBaseMock::GetUserBackupRules(const std::string& userName, std::string& 
       "letter": "B",
       "disk_size": "51200",
       "password": "backup123",
-      "file_path": "C:\\\\Backups\\\\diskb.vd"
+      "file_path": "C:\\Backups\\diskb.vd"
     }
   ],
   "config": [
