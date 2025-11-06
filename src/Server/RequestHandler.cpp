@@ -139,7 +139,7 @@ void RequestHandler::Handle(const boost::system::error_code& ec, std::size_t byt
 				jsonResponse.update(nlohmann::json::parse(supportedFormatsBackup));
 				std::string supportedFormatsBlock;
 				m_db->GetUserBlockRules(userName, supportedFormatsBlock);
-				jsonResponse["config_block"] = nlohmann::json::parse(supportedFormatsBlock)["config"];
+				jsonResponse["config_block"] = nlohmann::json::parse(supportedFormatsBlock)["config_block"];
 			}
 			else
 				jsonResponse["Option"] = "NotAllow";
