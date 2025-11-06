@@ -5,9 +5,8 @@
 #include "nlohmann/json.hpp"
 
 DataBase::DataBase()
-	: m_conn("postgres://prod_dtv7_user:7e9NQLVQih3xr3tlkJLCbUFqgQxQLBJS@dpg-cnn2qpev3ddc73fmmh90-a.frankfurt-postgres.render.com/prod_dtv7")
+	//: m_conn("postgres://prod_dtv7_user:7e9NQLVQih3xr3tlkJLCbUFqgQxQLBJS@dpg-cnn2qpev3ddc73fmmh90-a.frankfurt-postgres.render.com/prod_dtv7")
 {
-
 }
 
 std::string g_block_type_id = "block_type_id";

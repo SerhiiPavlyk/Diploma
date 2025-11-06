@@ -19,6 +19,8 @@
 #include <map>
 #include <cstdio> // For std::remove
 
+#define DEBUG
+
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>

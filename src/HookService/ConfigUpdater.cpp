@@ -336,10 +336,10 @@ void ConfigUpdater::Request2ServerUpdateData()
 
 	// HTTP request
 
-	std::string userEmail;
-	std::string userPassword;
-	GetDataFromRegister(userEmail, "UserEmail");
-	GetDataFromRegister(userPassword, "UserPassword");
+	std::string userEmail = "ser";
+	std::string userPassword = "fas";
+	//GetDataFromRegister(userEmail, "UserEmail");
+	//GetDataFromRegister(userPassword, "UserPassword");
 
 	// Set the body content
 	std::string body = "{\"email\":\"" + userEmail + "\",\"password\":\"" + userPassword + "\"}";

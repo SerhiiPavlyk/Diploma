@@ -10,13 +10,15 @@
 
 #include "DataBase.h"
 
+#include "DataBaseMock.h"
+
 #include "nlohmann/json.hpp"
 
 RequestHandler::RequestHandler(Server& server)
 	: m_server(server)
 {
 	m_socket.reset(new boost::asio::ip::tcp::socket(server.GetIOService()));
-	m_db.reset(new DataBase());
+	m_db.reset(new DataBaseMock());
 }
 
 void RequestHandler::Answer()

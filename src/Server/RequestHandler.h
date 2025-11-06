@@ -2,7 +2,7 @@
 #include "pch.h"
 
 class Server;
-class DataBase;
+struct IDataBase;
 
 class RequestHandler : public boost::enable_shared_from_this<RequestHandler>
 {
@@ -25,5 +25,5 @@ private:
     Server& m_server;
     boost::asio::streambuf m_response;
     boost::asio::streambuf m_request;
-    std::unique_ptr<DataBase> m_db;
+    std::unique_ptr<IDataBase> m_db;
 };
