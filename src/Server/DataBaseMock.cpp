@@ -64,14 +64,14 @@ bool DataBaseMock::GetUserBackupRules(const std::string& userName, std::string& 
       "letter": "E",
       "disk_size": "102400",
       "password": "mySecret123",
-      "file_path": "C:\\Backups\\diske.vd"
+      "file_path": "C:\Backups\diske.vd"
     },
     {
       "active": true,
       "letter": "B",
       "disk_size": "51200",
       "password": "backup123",
-      "file_path": "C:\\Backups\\diskb.vd"
+      "file_path": "C:\Backups\diskb.vd"
     }
   ],
   "config": [
@@ -94,7 +94,7 @@ bool DataBaseMock::GetUserBackupRules(const std::string& userName, std::string& 
 bool DataBaseMock::GetUserBlockRules(const std::string& userName, std::string& supportedFormats)
 {
 	supportedFormats = R"({
-  "config_block": [
+  "config": [
     {
       "action": true,
       "extension": ".pdf",
