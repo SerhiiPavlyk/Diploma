@@ -94,7 +94,7 @@ bool DataBaseMock::GetUserBackupRules(const std::string& userName, std::string& 
 bool DataBaseMock::GetUserBlockRules(const std::string& userName, std::string& supportedFormats)
 {
 	supportedFormats = R"({
-  "config_block": [
+  "config": [
     {
       "action": true,
       "extension": ".pdf",
